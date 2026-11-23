@@ -1,0 +1,112 @@
+{
+  "game": "Grand Theft Auto VI",
+  "copyright": "Game imagery © Rockstar Games / Take-Two Interactive.",
+  "use": "Cropped identification thumbnails for this non-commercial fan guide.",
+  "portraits": {
+    "jason": {
+      "name": "Jason Duval",
+      "file": "jason.webp",
+      "source": "Rockstar Store",
+      "page": "https://store.rockstargames.com/zh-CN/game/buy-gta-vi",
+      "image": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg"
+    },
+    "lucia": {
+      "name": "Lucia Caminos",
+      "file": "lucia.webp",
+      "source": "Rockstar Store",
+      "page": "https://store.rockstargames.com/zh-CN/game/buy-gta-vi",
+      "image": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg"
+    },
+    "cal": {
+      "name": "Cal Hampton",
+      "file": "cal.webp",
+      "source": "Rockstar Store",
+      "page": "https://store.rockstargames.com/zh-CN/game/buy-gta-vi",
+      "image": "https://images.ctfassets.net/h1rqp7q66d54/Rv3M6YC6fqcA8asG7AzxN/599a55e2861b74efaefff4925497e219/06_-_Cal_Hampton_03.jpg"
+    },
+    "brian": {
+      "name": "Brian Heder",
+      "file": "brian.webp",
+      "source": "Rockstar Store",
+      "page": "https://store.rockstargames.com/zh-CN/game/buy-gta-vi",
+      "image": "https://images.ctfassets.net/h1rqp7q66d54/2Vz00jUYoeP5NkKe8Ndxjl/501679ea0108fe303eacfdc9e105f9f8/07_-_Brian_Heder_03.jpg"
+    },
+    "donnie": {
+      "name": "Donnie",
+      "file": "donnie.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/donnie",
+      "image": "https://www.gtabase.com/images/gta-6/characters/donnie.png"
+    },
+    "mattia": {
+      "name": "Mattia Tauro",
+      "file": "mattia.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/mattia",
+      "image": "https://www.gtabase.com/images/gta-6/characters/mattia.png"
+    },
+    "kat": {
+      "name": "Katerina Rosselli",
+      "file": "kat.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/kat",
+      "image": "https://www.gtabase.com/images/gta-6/characters/kat.png"
+    },
+    "boobie": {
+      "name": "Boobie Ike",
+      "file": "boobie.webp",
+      "source": "Rockstar Store",
+      "page": "https://store.rockstargames.com/zh-CN/game/buy-gta-vi",
+      "image": "https://images.ctfassets.net/h1rqp7q66d54/6v2JTUd2v42B11Zr4VcMlg/1fcc79999e9de192d9f76bf82712f9a7/05_-_Boobie_Ike_02.jpg"
+    },
+    "drequan": {
+      "name": "Dre’Quan Priest",
+      "file": "drequan.webp",
+      "source": "Rockstar Games",
+      "page": "https://www.rockstargames.com/VI/only-in-leonida",
+      "image": "https://www.rockstargames.com/VI/_next/static/media/poster.0dgzn0invq.yx.jpg"
+    },
+    "raul": {
+      "name": "Raul Bautista",
+      "file": "raul.webp",
+      "source": "Rockstar Games",
+      "page": "https://www.rockstargames.com/VI/only-in-leonida",
+      "image": "https://www.rockstargames.com/VI/_next/static/media/poster.0ntc_0yu6jyg..jpg"
+    },
+    "linda": {
+      "name": "Linda",
+      "file": "linda.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/linda",
+      "image": "https://www.gtabase.com/images/gta-6/characters/linda.png"
+    },
+    "vicki": {
+      "name": "Vicki",
+      "file": "vicki.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/vicki",
+      "image": "https://www.gtabase.com/images/gta-6/characters/vicki.png"
+    },
+    "moses": {
+      "name": "Moses Watkins",
+      "file": "moses.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/moses",
+      "image": "https://www.gtabase.com/images/gta-6/characters/moses.png"
+    },
+    "dunk": {
+      "name": "Dunk",
+      "file": "dunk.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/dunk",
+      "image": "https://www.gtabase.com/images/gta-6/characters/dunk.png"
+    },
+    "real-dimez": {
+      "name": "Real Dimez",
+      "file": "real-dimez.webp",
+      "source": "Rockstar Games",
+      "page": "https://www.rockstargames.com/VI/only-in-leonida",
+      "image": "https://www.rockstargames.com/VI/_next/static/media/poster.0fw301vbqh4~b.jpg"
+    }
+  }
+}
