@@ -208,54 +208,58 @@
     }));
   }
 
+  function referenceTable(className, label, headings, rows) {
+    const table = node('table', className);
+    table.setAttribute('aria-label', label);
+    const head = table.createTHead().insertRow();
+    for (const title of headings) {
+      const th = node('th', '', title);
+      th.scope = 'col';
+      head.append(th);
+    }
+    table.createTBody().append(...rows);
+    return table;
+  }
+
+  function disclosure(label, content) {
+    const details = node('details', 'notes-disclosure');
+    const summary = node('summary', '', label);
+    summary.append(symbol('chevron'));
+    details.append(summary, content);
+    return details;
+  }
+
   function renderWeapons(chapter, rec, visited) {
-    $('weapon-count').textContent = chapter.weapons.length ? chapter.weapons.length + ' 件章内限定' : '';
-    const cards = chapter.weapons.map(weapon => {
-      const card = node('article', 'weapon-card');
-      const art = node('div', 'weapon-art');
-      if (weapon.id === 'donnie-hl-38') {
-        const image = node('img');
-        image.src = 'assets/trunk.webp';
-        image.alt = '傍晚打开的汽车后备箱，领取地点的氛围插画';
-        image.loading = 'lazy';
-        art.append(image);
-      } else {
-        card.classList.add('text-only');
-      }
-      const body = node('div', 'weapon-content');
+    $('weapon-count').textContent = chapter.weapons.length + ' 件';
+    const rows = chapter.weapons.map(weapon => {
+      const row = node('tr', 'weapon-card');
+      const name = row.insertCell();
+      name.append(node('h3', '', localized(weapon)), node('span', 'en-name', weapon.original));
       const windowMission = chapter.missions.find(mission => mission.id === weapon.availableAfter);
       const expired = rec.done.includes(weapon.expiresAt) || (weapon.expiresAt !== rec.active && visited.has(weapon.expiresAt));
-      const inWindow = !!rec.active && rec.active === weapon.availableAfter;
-      const windowStatus = expired ? '领取任务已结束' : inWindow ? '当前任务可领取' : '任务内限定';
-      const status = node('p', 'weapon-status', rec.owned.includes(weapon.id) ? '已收录' : windowStatus);
-      body.append(status, node('h3', '', localized(weapon)), node('p', 'en-name', weapon.original));
-      const hint = node('p', 'weapon-tip');
-      hint.append(symbol('flag'), node('span', '', windowMission ? '领取窗口 · ' + missionLabel(windowMission) : weapon.timing));
-      body.append(hint);
-      const howTo = node('details', 'pickup-info');
-      howTo.open = inWindow;
-      const summary = node('summary', '', '查看领取提示');
-      summary.append(symbol('chevron'));
-      howTo.append(summary, node('p', 'weapon-description', weapon.tip));
-      body.append(howTo);
-      const collect = collectionButton(rec, weapon);
-      collect.addEventListener('collectionchange', () => {
-        status.textContent = rec.owned.includes(weapon.id) ? '已收录' : windowStatus;
-      });
-      body.append(collect);
+      const inWindow = !expired && !!rec.active && rec.active === weapon.availableAfter;
+      const status = expired ? '领取窗口已结束' : inWindow ? '当前任务可领取' : '任务内限定';
+      const timing = row.insertCell();
+      const stateClass = expired ? ' expired' : inWindow ? ' active' : '';
+      timing.append(node('span', 'weapon-status' + stateClass, status), node('span', 'weapon-window', windowMission ? missionLabel(windowMission) : weapon.timing));
+      const hint = disclosure('领取提示', node('p', 'weapon-description', weapon.tip));
+      hint.className = 'pickup-info';
+      hint.open = inWindow;
+      timing.append(hint);
+      const actions = row.insertCell();
+      actions.append(collectionButton(rec, weapon));
       const refs = entrySources((weapon.sources || []).map(id => sources.get(id)).filter(Boolean));
-      if (refs) body.append(refs);
-      if (art.childElementCount) card.append(art);
-      card.append(body);
-      return card;
+      if (refs) actions.append(refs);
+      return row;
     });
-    setList('weapon-list', cards, chapter.weaponsNote || '本章暂未收录经核实的永久错过武器。');
+    setList('weapon-list', rows.length ? [referenceTable('weapon-table', '本章限定武器', ['物品', '领取窗口', '收录'], rows)] : [], chapter.weaponsNote || '本章暂未收录经核实的永久错过武器。');
   }
 
   function renderMissions(chapter, rec, visited) {
     const known = [];
     const ahead = [];
     const all = [];
+    const priority = [rec.active, 'gone-fishing', 'unwanted-attention', 'buck-me', ...rec.done.slice().reverse()];
     for (const mission of chapter.missions) {
       const status = missionStatus(mission, rec, visited);
       const statusClass = 'row-state' + (status === '已完成' ? ' done' : status === '进行中' ? ' active' : '');
@@ -267,19 +271,23 @@
       if (refs) row.append(refs);
       all.push(row);
       if (!mission.unlock?.length) continue;
-      const feature = node('div', 'unlock-row');
-      feature.append(node('b', '', missionLabel(mission)), node('span', 'feature', mission.unlock.join(' ')), node('span', statusClass, status));
-      (visited.has(mission.id) ? known : ahead).push(feature);
+      const feature = node('tr', 'unlock-row');
+      feature.insertCell().append(missionTitleBlock(mission));
+      feature.insertCell().append(node('span', 'feature', mission.unlock.join(' ')));
+      feature.insertCell().append(node('span', statusClass, status));
+      if (visited.has(mission.id)) {
+        const rank = priority.indexOf(mission.id);
+        known.push({rank: rank < 0 ? priority.length : rank, row: feature});
+      } else {
+        ahead.push(feature);
+      }
     }
     $('mission-count').textContent = rec.done.length + ' / ' + chapter.missions.length + ' 已标记完成';
-    setList('unlock-list', known, '标记已游玩的任务后，这里会列出对应的能力和功能。');
-    if (ahead.length) {
-      const details = node('details', 'notes-disclosure');
-      const summary = node('summary', '', '预览本章其余任务的功能解锁');
-      summary.append(symbol('chevron'));
-      details.append(summary, ...ahead);
-      $('unlock-list').append(details);
-    }
+    const unlockTable = rows => referenceTable('unlock-table', '任务对应功能', ['任务', '开放功能', '进度'], rows);
+    const ranked = known.sort((a, b) => a.rank - b.rank).map(item => item.row);
+    setList('unlock-list', ranked.length ? [unlockTable(ranked.slice(0, 3))] : [], '记录当前任务后，可在这里查看已遇到的功能。');
+    if (ranked.length > 3) $('unlock-list').append(disclosure('其余已遇到的功能（' + (ranked.length - 3) + '）', unlockTable(ranked.slice(3))));
+    if (ahead.length) $('unlock-list').append(disclosure('预览本章后续功能（' + ahead.length + '）', unlockTable(ahead)));
     $('mission-list').replaceChildren(...all);
     $('chapter-note').textContent = chapter.note || '';
     $('chapter-note').hidden = !chapter.note;
@@ -288,11 +296,33 @@
     $('next-chapter').hidden = !(index < chapters.length - 1 && last && rec.done.includes(last.id));
   }
 
+  function encountered(person, visited) {
+    return !person.appearsAfter || visited.has(person.appearsAfter) || person.knownBy?.some(id => visited.has(id));
+  }
+
   function renderPeople(chapter, visited) {
-    const people = chapter.people.filter(person => !person.appearsAfter || visited.has(person.appearsAfter) || person.knownBy?.some(id => visited.has(id)));
-    $('people-count').textContent = people.length ? people.length + ' 位已登场' : '';
+    const people = chapter.people.filter(person => encountered(person, visited));
+    const portraitRail = $('portrait-rail');
+    const portraits = people.filter(person => person.portrait).slice(0, 3);
+    portraitRail.replaceChildren(...portraits.map(person => {
+      const address = node('a', 'rail-person');
+      address.href = '#person-' + person.id;
+      const image = node('img');
+      image.src = person.portrait;
+      image.alt = '';
+      address.append(image, node('span', 'rail-caption', localized(person, 'name')));
+      return address;
+    }));
+    if (!portraits.length) {
+      const scene = node('img', 'rail-scenery');
+      scene.src = 'assets/keys-dusk-mobile.webp';
+      scene.alt = '海湾公路与暮色中的棕榈';
+      portraitRail.append(scene);
+    }
+    $('people-count').textContent = people.length + ' 位已登场';
     setList('people-list', people.map(person => {
       const card = node('article', 'person');
+      card.id = 'person-' + person.id;
       const photo = node('div', 'person-photo');
       if (person.portrait) {
         const img = node('img');
@@ -320,7 +350,7 @@
       for (const id of entry.sources || []) ids.add(id);
     }
     for (const person of chapter.people) {
-      if (!person.appearsAfter || visited.has(person.appearsAfter)) {
+      if (encountered(person, visited)) {
         for (const id of person.sources || []) ids.add(id);
       }
     }
@@ -358,20 +388,21 @@
     const active = chapter.missions.find(mission => mission.id === rec.active);
     const latest = chapter.missions.find(mission => mission.id === rec.done.at(-1));
     $('progress-label').textContent = active ? '正在进行' : latest ? '最近完成' : '任务进度';
-    $('current-mission').textContent = active ? missionLabel(active) : latest ? missionLabel(latest) : '尚未记录';
-    $('cover-current').textContent = [chapter.label, active ? missionLabel(active) : localized(chapter)].join(' · ');
+    const current = active || latest;
+    $('current-mission').textContent = current ? missionLabel(current) : '尚未记录';
+    $('current-original').textContent = current?.original || '';
     const focus = $('focus-note');
-    focus.hidden = !active?.focusNote;
-    focus.replaceChildren();
-    if (active?.focusNote) {
-      const last = chapter.missions.find(mission => mission.isFinal);
-      const note = last ? active.focusNote.replace('「' + last.title + '」', '章末') : active.focusNote;
-      focus.append(symbol('compass'), node('div', '', note));
-    }
+    const last = chapter.missions.find(mission => mission.isFinal);
+    let note = active?.focusNote;
+    if (note && last) note = note.replace('「' + last.title + '」', '章末');
+    if (active?.id === 'tourist-trap') note = '已进入章末连续任务。唐尼左轮的领取窗口已结束，可以继续推进主线。';
+    if (!note) note = active?.unlock?.join(' ') || (current ? '完成任务后，在进度清单中勾选，即可更新本章记录。' : '选择正在游玩的任务，查看领取窗口、已开放功能和已登场人物。');
+    focus.replaceChildren(node('div', '', note));
+    focus.hidden = false;
     $('final-note').hidden = true;
     $('final-note').textContent = chapter.finalNote || '';
     $('final-toggle').setAttribute('aria-expanded', 'false');
-    $('final-toggle').querySelector('span').textContent = '点按查看';
+    $('final-toggle').querySelector('span').textContent = '查看章末任务';
     $('all-missions').open = false;
     document.querySelector('.source-drawer').open = false;
     renderWeapons(chapter, rec, visited);
@@ -459,7 +490,7 @@
     const last = chapterOf(state).missions.find(mission => mission.isFinal);
     button.setAttribute('aria-expanded', String(open));
     $('final-note').hidden = !(open && chapterOf(state).finalNote);
-    button.querySelector('span').textContent = open ? (last ? missionLabel(last) + (last.original ? ' · ' + last.original : '') : '章末任务仍待核实') : '点按查看';
+    button.querySelector('span').textContent = open ? (last ? missionLabel(last) + (last.original ? ' · ' + last.original : '') : '章末任务仍待核实') : '查看章末任务';
   });
   for (const button of document.querySelectorAll('[data-open]')) button.addEventListener('click', () => openDialog());
   for (const id of ['dismiss','cancel']) $(id).addEventListener('click', () => dialog.close());
@@ -477,8 +508,40 @@
     menuToggle.setAttribute('aria-expanded', String(open));
     menuToggle.setAttribute('aria-label', open ? '关闭导航' : '打开导航');
   }
+  const destinations = [...menu.querySelectorAll('a[href^="#"]')].map(link => ({
+    link, target: $(link.hash.slice(1)),
+  })).filter(item => item.target);
+  function highlight(id) {
+    for (const {link, target} of destinations) {
+      if (target.id === id) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    }
+  }
+  function followFragment() {
+    const id = location.hash.slice(1);
+    if (id === 'references') document.querySelector('.source-drawer').open = true;
+    highlight(id.startsWith('person-') ? 'people' : id || 'chapter');
+  }
+  let scrollFrame = 0;
+  function syncScroll() {
+    scrollFrame = 0;
+    const atBottom = window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    const reached = destinations.filter(({target}) => target.getBoundingClientRect().top <= 100);
+    const current = atBottom ? destinations.at(-1) : reached.at(-1) || destinations[0];
+    if (current) highlight(current.target.id);
+  }
+  window.addEventListener('scroll', () => {
+    if (!scrollFrame) scrollFrame = requestAnimationFrame(syncScroll);
+  }, {passive: true});
+  window.addEventListener('hashchange', followFragment);
   menuToggle.addEventListener('click', () => setMenu(menu.hidden));
-  menu.addEventListener('click', event => { if (event.target.closest('a')) setMenu(false); });
+  menu.addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (!link) return;
+    if (link.hash === '#references') document.querySelector('.source-drawer').open = true;
+    highlight(link.hash.slice(1));
+    setMenu(false);
+  });
   document.addEventListener('click', event => {
     if (!menu.hidden && !menu.contains(event.target) && !menuToggle.contains(event.target)) setMenu(false);
   });
@@ -495,4 +558,5 @@
     }
   });
   render();
+  followFragment();
 })();
