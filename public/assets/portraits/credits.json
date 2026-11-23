@@ -107,6 +107,48 @@
       "source": "Rockstar Games",
       "page": "https://www.rockstargames.com/VI/only-in-leonida",
       "image": "https://www.rockstargames.com/VI/_next/static/media/poster.0fw301vbqh4~b.jpg"
+    },
+    "mandy": {
+      "name": "Mandy",
+      "file": "mandy.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/mandy",
+      "image": "https://www.gtabase.com/images/gta-6/characters/mandy.png"
+    },
+    "kenton": {
+      "name": "Kenton Rees",
+      "file": "kenton.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/kenton",
+      "image": "https://www.gtabase.com/images/gta-6/characters/kenton.png"
+    },
+    "tyrone": {
+      "name": "Tyrone Russo",
+      "file": "tyrone.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/tyrone",
+      "image": "https://www.gtabase.com/images/gta-6/characters/tyrone.jpg"
+    },
+    "randy": {
+      "name": "Randy Kozlov",
+      "file": "randy.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/randy",
+      "image": "https://www.gtabase.com/images/gta-6/characters/randy.jpg"
+    },
+    "yasmani": {
+      "name": "Yasmani Cabrera",
+      "file": "yasmani.webp",
+      "source": "PC Gamer via Leonidaguide",
+      "page": "https://leonidaguide.gg/en/wiki/characters/yasmani/",
+      "image": "https://leonidaguide.gg/_astro/gta-6-ricettatore-yasmani.-cn0_VRU_15As3z.webp"
+    },
+    "nicole": {
+      "name": "Nicole Park",
+      "file": "nicole.webp",
+      "source": "GTA Base",
+      "page": "https://www.gtabase.com/gta-6/characters/nicole-park",
+      "image": "https://www.gtabase.com/images/gta-6/characters/nicole-park.jpg"
     }
   }
 }

@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#16131b">
+  <meta name="theme-color" content="#171223">
   <meta name="description" content="GTA VI 的中文无剧透游玩手记。按当前章节查看武器收集窗口、任务解锁与已登场的人物。">
   <title>日落路书 · GTA VI 无剧透游玩手记</title>
   <link rel="icon" href="assets/sunset.svg" type="image/svg+xml">
-  <link rel="preload" href="assets/coast.webp" as="image" fetchpriority="high" media="(min-width: 641px)">
-  <link rel="preload" href="assets/coast-mobile.webp" as="image" fetchpriority="high" media="(max-width: 640px)">
+  <link rel="preload" href="assets/keys-dusk.webp" as="image" fetchpriority="high" media="(min-width: 701px)">
+  <link rel="preload" href="assets/keys-dusk-mobile.webp" as="image" fetchpriority="high" media="(max-width: 700px)">
   <link rel="stylesheet" href="style.css">
   <script defer src="guide-data.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="symbols" aria-hidden="true">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h14M3 18h18"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-3-2-6-2-10-1v14c4-1 7-1 10 1 3-2 6-2 10-1V5c-4-1-7-1-10 1Zm0 0v14"/></symbol>
     <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4m0 1c4-4 9 3 15-1l-2 5 2 4c-6 4-10-3-15 1"/></symbol>
     <symbol id="i-slider" viewBox="0 0 24 24"><path d="M3 7h7m5 0h6M3 17h3m5 0h10"/><circle cx="12.5" cy="7" r="2.5"/><circle cx="8.5" cy="17" r="2.5"/></symbol>
@@ -27,63 +28,95 @@
     <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="9" r="4.5"/><path d="m11.5 12.5 7 7 3-3-2-2-1.5 1.5-2-2"/></symbol>
     <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></symbol>
   </svg>
-  <a class="skip" href="#weapons">跳到本章手记</a>
-  <header class="topbar">
-    <div class="wrap nav-inner">
-      <a class="brand" href="#top" aria-label="日落路书首页"><img src="assets/sunset.svg" width="43" height="43" alt=""><span class="brand-words"><b>日落路书</b><small>LEONIDA FIELD NOTES</small></span></a>
-      <nav aria-label="本章手记导航"><a href="#weapons">武器备忘</a><a href="#missions">任务解锁</a><a href="#people">人物名录</a></nav>
-      <button class="nav-button" type="button" data-open><svg><use href="#i-mark"/></svg><span>我的进度</span></button>
+  <a class="skip" href="#chapter">跳到当前章节</a>
+  <header class="mast" id="top">
+    <div class="wrap mast-inner">
+      <a class="wordmark" href="#top" aria-label="日落路书首页">
+        <img src="assets/sunset.svg" width="40" height="40" alt="">
+        <span>LEONIDA<br>FIELD NOTES</span>
+      </a>
+      <div class="mast-actions">
+        <button class="mast-progress" type="button" data-open aria-label="我的进度"><span class="progress-prefix">我的</span>进度</button>
+        <button class="menu-button" type="button" id="menu-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="site-menu"><svg><use href="#i-menu"/></svg></button>
+      </div>
+      <nav id="site-menu" class="menu" aria-label="站内导航" hidden>
+        <a href="#chapter">当前手记</a><a href="#weapons">武器备忘</a><a href="#missions">任务与解锁</a><a href="#people">人物名录</a><a href="#references">资料来源</a>
+      </nav>
     </div>
   </header>
-  <main id="top">
-    <section class="hero" aria-labelledby="hero-title">
-      <picture class="hero-image"><source media="(max-width: 640px)" srcset="assets/coast-mobile.webp"><img src="assets/coast.webp" fetchpriority="high" alt=""></picture>
-      <div class="hero-shade"></div>
-      <div class="wrap hero-content">
-        <div class="eyebrow hero-kicker"><span></span> GRAND THEFT AUTO VI</div>
-        <h1 id="hero-title">日落路书</h1>
-        <p class="hero-subtitle">Leonida Field Notes</p>
-        <p class="hero-description">一份随进度翻页的无剧透手记。<br>记下本章的限时武器、任务解锁与沿途人物。</p>
-        <button class="primary" type="button" data-open><svg><use href="#i-slider"/></svg>设置游玩进度</button>
+  <main>
+    <section class="cover" aria-labelledby="hero-title">
+      <picture class="cover-art">
+        <source media="(max-width: 700px)" srcset="assets/keys-dusk-mobile.webp">
+        <img src="assets/keys-dusk.webp" alt="" fetchpriority="high">
+      </picture>
+      <div class="cover-screen"></div>
+      <div class="wrap cover-layout">
+        <div class="cover-type">
+          <p class="cover-kicker" lang="en">Grand Theft Auto VI</p>
+          <h1 id="hero-title" aria-label="日落路书"><span aria-hidden="true">日落</span><span aria-hidden="true">路书</span></h1>
+          <p class="cover-signature" lang="en">Leonida Field Notes</p>
+          <p class="cover-caption">无剧透游玩手记</p>
+        </div>
+        <a class="cover-jump" href="#chapter"><span class="jump-mark" aria-hidden="true"><svg><use href="#i-chevron"/></svg></span><span><b>进入本章手记</b><small id="cover-current">第一章</small></span></a>
       </div>
     </section>
-    <div class="status-strip">
-      <div class="wrap status-inner">
-        <div class="status-item"><svg><use href="#i-book"/></svg><div><small>当前章节</small><strong id="chapter-name">第一章</strong></div></div>
-        <div class="status-item"><svg><use href="#i-pin"/></svg><div><small id="progress-label">任务进度</small><strong id="current-mission">尚未记录</strong></div></div>
-        <div class="status-item"><svg><use href="#i-flag"/></svg><div><small>本章最后任务</small><button id="final-toggle" class="reveal" type="button" aria-expanded="false"><span>点按查看</span><svg><use href="#i-eye"/></svg></button></div></div>
+    <section class="chapter-intro" id="chapter" aria-labelledby="chapter-name">
+      <div class="wrap">
+        <div class="chapter-layout">
+          <div class="chapter-title">
+            <p class="kicker" id="chapter-index">第一章</p>
+            <h2 id="chapter-name">当前手记</h2><p id="chapter-original" class="chapter-en" lang="en"></p>
+          </div>
+          <div class="progress-panel">
+            <div class="progress-line"><div><small id="progress-label">任务进度</small><strong id="current-mission">尚未记录</strong></div><button class="edit" type="button" data-open>调整进度<svg><use href="#i-slider"/></svg></button></div>
+            <div class="chapter-last"><small>本章最后任务</small><button id="final-toggle" class="reveal" type="button" aria-expanded="false" aria-controls="final-note"><span>点按查看</span><svg><use href="#i-eye"/></svg></button></div>
+            <p id="final-note" class="final-note" hidden></p>
+          </div>
+        </div>
+        <aside id="focus-note" class="focus-note" hidden></aside>
+        <nav class="chapter-nav" aria-label="本章手记导航">
+          <a href="#weapons"><img src="assets/marks/weapon.webp" alt="">武器备忘</a>
+          <a href="#missions"><img src="assets/marks/mission.webp" alt="">任务解锁</a>
+          <a href="#people"><img src="assets/marks/people.webp" alt="">人物名录</a>
+        </nav>
       </div>
-      <div id="final-note" class="wrap strip-note" hidden></div>
-    </div>
-    <div class="wrap entries">
-      <aside id="focus-note" class="focus-note" hidden></aside>
-      <section id="weapons" class="section-block" aria-labelledby="weapon-title">
-        <header class="section-heading"><div><p class="eyebrow accent">FIELD INVENTORY</p><h2 id="weapon-title">武器备忘</h2></div><span class="section-count" id="weapon-count"></span></header>
+    </section>
+    <section id="weapons" class="inventory section-pad" aria-labelledby="weapon-title">
+      <div class="wrap">
+        <header class="section-head"><div><p class="kicker" lang="en">The inventory</p><h2 id="weapon-title">武器备忘</h2></div><span class="section-count" id="weapon-count"></span></header>
         <div id="weapon-list"></div>
-      </section>
-      <section id="missions" class="section-block" aria-labelledby="mission-title">
-        <header class="section-heading"><div><p class="eyebrow cyan">MISSION LOG</p><h2 id="mission-title">任务与解锁</h2></div><span class="section-count" id="mission-count"></span></header>
-        <div id="unlock-list"></div>
-        <details class="notes-disclosure" id="all-missions"><summary>本章任务目录<svg><use href="#i-chevron"/></svg></summary><div id="mission-list"></div></details>
-        <p class="context-note" id="chapter-note" hidden></p>
-        <button class="secondary next-chapter" type="button" id="next-chapter" hidden>已进入下一章</button>
-      </section>
-      <section id="people" class="section-block" aria-labelledby="people-title">
-        <header class="section-heading"><div><p class="eyebrow lilac">CONTACT SHEET</p><h2 id="people-title">人物名录 <span class="experiment">实验性</span></h2></div><span class="section-count" id="people-count"></span></header>
+        <details class="disclosure field-notes" id="field-notes" hidden><summary>其他领取窗口与可选事项<svg><use href="#i-chevron"/></svg></summary><div id="field-list"></div></details>
+      </div>
+    </section>
+    <section id="missions" class="mission-section section-pad" aria-labelledby="mission-title">
+      <div class="wrap split">
+        <header class="section-head rail"><div><p class="kicker" lang="en">Mission log</p><h2 id="mission-title">任务与解锁</h2></div><span class="section-count" id="mission-count"></span></header>
+        <div class="mission-contents">
+          <div id="unlock-list"></div>
+          <details class="disclosure" id="all-missions"><summary>本章任务目录<svg><use href="#i-chevron"/></svg></summary><div id="mission-list"></div></details>
+          <p class="context-note" id="chapter-note" hidden></p>
+          <button class="secondary next-chapter" type="button" id="next-chapter" hidden>已进入下一章</button>
+        </div>
+      </div>
+    </section>
+    <section id="people" class="contacts section-pad" aria-labelledby="people-title">
+      <div class="wrap">
+        <header class="section-head"><div><p class="kicker" lang="en">People of Leonida</p><h2 id="people-title">人物名录 <span class="experiment">实验性</span></h2></div><span class="section-count" id="people-count"></span></header>
         <div id="people-list" class="people-list"></div>
-      </section>
-      <details class="notes-disclosure source-drawer"><summary>本章资料来源<svg><use href="#i-chevron"/></svg></summary><div id="sources"></div></details>
-    </div>
+      </div>
+    </section>
+    <div id="references" class="wrap references"><details class="disclosure source-drawer"><summary>本章资料来源<svg><use href="#i-chevron"/></svg></summary><div id="sources"></div></details></div>
   </main>
-  <footer><div class="wrap footer-inner"><span><img src="assets/sunset.svg" alt="" width="26" height="26">日落路书</span><p>GTA VI 非官方游玩手记 · 进度保存在此浏览器</p></div></footer>
+  <footer><div class="wrap footer-inner"><a class="footer-brand" href="#top">日落路书<span lang="en">Leonida Field Notes</span></a><p>GTA VI 非官方游玩手记<br>进度保存在当前浏览器</p></div></footer>
   <dialog id="progress-dialog" aria-labelledby="dialog-title">
     <form id="progress-form">
-      <header class="dialog-header"><div><p class="eyebrow accent">PLAYTHROUGH</p><h2 id="dialog-title">我的进度</h2></div><button type="button" id="dismiss" aria-label="关闭"><svg><use href="#i-x"/></svg></button></header>
+      <header class="dialog-header"><div><p class="kicker" lang="en">Playthrough</p><h2 id="dialog-title">我的进度</h2></div><button type="button" id="dismiss" aria-label="关闭"><svg><use href="#i-x"/></svg></button></header>
       <div class="dialog-scroll">
         <label class="input-caption" for="chapter-select">当前章节</label><div class="select-wrap"><select id="chapter-select"></select><svg><use href="#i-chevron"/></svg></div>
         <label class="input-caption" for="active-select">正在进行的任务</label><div class="select-wrap"><select id="active-select"></select><svg><use href="#i-chevron"/></svg></div>
         <label class="input-caption" for="lang-select">游戏内译名</label><div class="select-wrap"><select id="lang-select"><option value="zh-Hans">简体中文</option><option value="zh-Hant">繁體中文</option></select><svg><use href="#i-chevron"/></svg></div>
-        <fieldset><legend>已完成的任务</legend><p class="muted">勾选游戏中已完成的任务，人物和武器提醒会随之更新。</p><div id="checklist"></div></fieldset>
+        <fieldset><legend>已完成的任务</legend><p class="muted">选择当前任务即可更新手记。这里可以单独记录已完成的任务。</p><div id="checklist"></div></fieldset>
       </div>
       <div class="dialog-actions"><button type="button" class="secondary" id="cancel">取消</button><button type="submit" class="primary">保存进度</button></div>
     </form>
