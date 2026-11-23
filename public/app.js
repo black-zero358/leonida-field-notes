@@ -1,14 +1,46 @@
 (() => {
   'use strict';
+  const $ = id => document.getElementById(id);
+  const page = document.body.dataset.page || 'chapter';
+  const script = document.currentScript || document.querySelector('script[src*="app.js"]');
+  const assetRoot = new URL('.', script?.src || document.baseURI);
+  const menu = $('site-menu');
+  // A downloaded copy uses explicit filenames; hosted routes use directory URLs.
+  if (location.protocol === 'file:') {
+    for (const link of document.querySelectorAll('a[href$="/"]')) {
+      const url = new URL(link.href);
+      if (url.protocol === 'file:') link.href += 'index.html';
+    }
+  }
+
+  function pageUrl(destination) {
+    return new URL(menu.querySelector('[data-page-link="' + destination + '"]').href);
+  }
+
+  function redirectOldBookmark() {
+    if (page !== 'chapter') return false;
+    const fragment = location.hash.slice(1);
+    const destination = /^person-[a-z0-9-]+$/.test(fragment) ? 'people' : fragment;
+    if (!['weapons', 'missions', 'people', 'references'].includes(destination)) return false;
+    const url = pageUrl(destination);
+    url.search = location.search;
+    if (destination !== fragment) url.hash = fragment;
+    location.replace(url.href);
+    return true;
+  }
+  if (redirectOldBookmark()) return;
+
   const guide = window.GUIDE_DATA;
   if (!guide?.chapters?.length) {
-    document.querySelector('#weapon-list').textContent = '手记资料未能载入，请刷新页面。';
+    const message = document.createElement('p');
+    message.setAttribute('role', 'alert');
+    message.textContent = '手记资料未能载入，请刷新页面。';
+    document.querySelector('main').prepend(message);
     return;
   }
   const chapters = guide.chapters;
   const sources = new Map(guide.sources.map(source => [source.id, source]));
   const key = 'leonida-field-notes.v1';
-  const $ = id => document.getElementById(id);
   const dialog = $('progress-dialog');
   const first = chapters[0];
   const fresh = () => ({chapter: first.id, reached: 0, lang: 'zh-Hans', records: {}});
@@ -229,6 +261,12 @@
     return details;
   }
 
+  function weaponWindow(weapon, rec, visited) {
+    if (rec.done.includes(weapon.expiresAt) || (visited.has(weapon.expiresAt) && rec.active !== weapon.expiresAt)) return 'expired';
+    if (rec.active && rec.active === weapon.availableAfter) return 'active';
+    return 'upcoming';
+  }
+
   function renderWeapons(chapter, rec, visited) {
     $('weapon-count').textContent = chapter.weapons.length + ' 件';
     const rows = chapter.weapons.map(weapon => {
@@ -236,15 +274,13 @@
       const name = row.insertCell();
       name.append(node('h3', '', localized(weapon)), node('span', 'en-name', weapon.original));
       const windowMission = chapter.missions.find(mission => mission.id === weapon.availableAfter);
-      const expired = rec.done.includes(weapon.expiresAt) || (weapon.expiresAt !== rec.active && visited.has(weapon.expiresAt));
-      const inWindow = !expired && !!rec.active && rec.active === weapon.availableAfter;
-      const status = expired ? '领取窗口已结束' : inWindow ? '当前任务可领取' : '任务内限定';
+      const windowState = weaponWindow(weapon, rec, visited);
+      const status = {expired: '领取窗口已结束', active: '当前任务可领取', upcoming: '任务内限定'}[windowState];
       const timing = row.insertCell();
-      const stateClass = expired ? ' expired' : inWindow ? ' active' : '';
-      timing.append(node('span', 'weapon-status' + stateClass, status), node('span', 'weapon-window', windowMission ? missionLabel(windowMission) : weapon.timing));
+      timing.append(node('span', 'weapon-status ' + windowState, status), node('span', 'weapon-window', windowMission ? missionLabel(windowMission) : weapon.timing));
       const hint = disclosure('领取提示', node('p', 'weapon-description', weapon.tip));
       hint.className = 'pickup-info';
-      hint.open = inWindow;
+      hint.open = windowState === 'active';
       timing.append(hint);
       const actions = row.insertCell();
       actions.append(collectionButton(rec, weapon));
@@ -300,25 +336,29 @@
     return !person.appearsAfter || visited.has(person.appearsAfter) || person.knownBy?.some(id => visited.has(id));
   }
 
-  function renderPeople(chapter, visited) {
-    const people = chapter.people.filter(person => encountered(person, visited));
+  function renderPortraitRail(people) {
     const portraitRail = $('portrait-rail');
     const portraits = people.filter(person => person.portrait).slice(0, 3);
     portraitRail.replaceChildren(...portraits.map(person => {
       const address = node('a', 'rail-person');
-      address.href = '#person-' + person.id;
+      const url = pageUrl('people');
+      url.hash = 'person-' + person.id;
+      address.href = url.href;
       const image = node('img');
-      image.src = person.portrait;
+      image.src = new URL(person.portrait, assetRoot).href;
       image.alt = '';
       address.append(image, node('span', 'rail-caption', localized(person, 'name')));
       return address;
     }));
     if (!portraits.length) {
       const scene = node('img', 'rail-scenery');
-      scene.src = 'assets/keys-dusk-mobile.webp';
+      scene.src = new URL('assets/keys-dusk-mobile.webp', assetRoot).href;
       scene.alt = '海湾公路与暮色中的棕榈';
       portraitRail.append(scene);
     }
+  }
+
+  function renderPeople(people) {
     $('people-count').textContent = people.length + ' 位已登场';
     setList('people-list', people.map(person => {
       const card = node('article', 'person');
@@ -326,7 +366,7 @@
       const photo = node('div', 'person-photo');
       if (person.portrait) {
         const img = node('img');
-        img.src = person.portrait;
+        img.src = new URL(person.portrait, assetRoot).href;
         img.alt = localized(person, 'name');
         img.loading = 'lazy';
         photo.append(img);
@@ -346,7 +386,7 @@
 
   function renderSources(chapter, visited) {
     const ids = new Set(chapter.sources || []);
-    for (const entry of [...chapter.missions, ...chapter.weapons]) {
+    for (const entry of [...chapter.missions, ...chapter.weapons, ...(chapter.fieldNotes || [])]) {
       for (const id of entry.sources || []) ids.add(id);
     }
     for (const person of chapter.people) {
@@ -370,12 +410,41 @@
     }
     const credits = node('p', 'context-note', '场景插画为原创，人物辨识缩略图附有独立图源。');
     const portraitCredits = node('a', '', '查看头像出处（含后续人物）');
-    portraitCredits.href = 'assets/portraits/credits.json';
+    portraitCredits.href = new URL('assets/portraits/credits.json', assetRoot).href;
     portraitCredits.target = '_blank';
     portraitCredits.rel = 'noopener noreferrer';
     credits.append(' ', portraitCredits);
     frag.append(credits);
     $('sources').replaceChildren(frag);
+  }
+
+  function renderChapter(chapter, rec, visited, active, current) {
+    const people = chapter.people.filter(person => encountered(person, visited));
+    const unlocked = chapter.missions.filter(mission => visited.has(mission.id) && mission.unlock?.length);
+    const windows = chapter.weapons.map(weapon => weaponWindow(weapon, rec, visited));
+    const collected = chapter.weapons.filter(weapon => rec.owned.includes(weapon.id)).length;
+    const available = windows.filter(status => status === 'active').length;
+    const expired = windows.filter(status => status === 'expired').length;
+    let itemStatus = chapter.weapons.length ? '本章有 ' + chapter.weapons.length + ' 件限时物品' : '本章有可补拿物品';
+    if (available) itemStatus = available + ' 件正处领取窗口';
+    if (collected) itemStatus = '已收录 ' + collected + ' 件限时物品';
+    else if (expired) itemStatus = expired + ' 件已过领取窗口';
+    $('weapon-count').textContent = itemStatus;
+    $('mission-count').textContent = '已遇到 ' + unlocked.length + ' 项功能';
+    $('people-count').textContent = people.length + ' 位已登场';
+    renderPortraitRail(people);
+    const focus = $('focus-note');
+    const last = chapter.missions.find(mission => mission.isFinal);
+    let note = active?.focusNote;
+    if (note && last) note = note.replace('「' + last.title + '」', '章末');
+    if (active?.id === 'tourist-trap') note = '已进入章末连续任务。唐尼左轮的领取窗口已结束，可以继续推进主线。';
+    if (!note) note = active?.unlock?.join(' ') || (current ? '完成任务后，在进度清单中勾选，即可更新本章记录。' : '选择正在游玩的任务，查看领取窗口、已开放功能和已登场人物。');
+    focus.replaceChildren(node('div', '', note));
+    focus.hidden = false;
+    $('final-note').hidden = true;
+    $('final-note').textContent = chapter.finalNote || '';
+    $('final-toggle').setAttribute('aria-expanded', 'false');
+    $('final-toggle').querySelector('span').textContent = '查看章末任务';
   }
 
   function render() {
@@ -391,25 +460,25 @@
     const current = active || latest;
     $('current-mission').textContent = current ? missionLabel(current) : '尚未记录';
     $('current-original').textContent = current?.original || '';
-    const focus = $('focus-note');
-    const last = chapter.missions.find(mission => mission.isFinal);
-    let note = active?.focusNote;
-    if (note && last) note = note.replace('「' + last.title + '」', '章末');
-    if (active?.id === 'tourist-trap') note = '已进入章末连续任务。唐尼左轮的领取窗口已结束，可以继续推进主线。';
-    if (!note) note = active?.unlock?.join(' ') || (current ? '完成任务后，在进度清单中勾选，即可更新本章记录。' : '选择正在游玩的任务，查看领取窗口、已开放功能和已登场人物。');
-    focus.replaceChildren(node('div', '', note));
-    focus.hidden = false;
-    $('final-note').hidden = true;
-    $('final-note').textContent = chapter.finalNote || '';
-    $('final-toggle').setAttribute('aria-expanded', 'false');
-    $('final-toggle').querySelector('span').textContent = '查看章末任务';
-    $('all-missions').open = false;
-    document.querySelector('.source-drawer').open = false;
-    renderWeapons(chapter, rec, visited);
-    renderFieldNotes(chapter, rec, visited);
-    renderMissions(chapter, rec, visited);
-    renderPeople(chapter, visited);
-    renderSources(chapter, visited);
+    switch (page) {
+      case 'chapter':
+        renderChapter(chapter, rec, visited, active, current);
+        break;
+      case 'weapons':
+        renderWeapons(chapter, rec, visited);
+        renderFieldNotes(chapter, rec, visited);
+        break;
+      case 'missions':
+        $('all-missions').open = false;
+        renderMissions(chapter, rec, visited);
+        break;
+      case 'people':
+        renderPeople(chapter.people.filter(person => encountered(person, visited)));
+        break;
+      case 'references':
+        renderSources(chapter, visited);
+        break;
+    }
   }
 
   function changeChapter(index) {
@@ -484,7 +553,7 @@
     render();
     notify(saved ? '已保存本机进度' : '记录仅在本次打开期间有效');
   });
-  $('final-toggle').addEventListener('click', event => {
+  $('final-toggle')?.addEventListener('click', event => {
     const button = event.currentTarget;
     const open = button.getAttribute('aria-expanded') === 'false';
     const last = chapterOf(state).missions.find(mission => mission.isFinal);
@@ -494,53 +563,23 @@
   });
   for (const button of document.querySelectorAll('[data-open]')) button.addEventListener('click', () => openDialog());
   for (const id of ['dismiss','cancel']) $(id).addEventListener('click', () => dialog.close());
-  $('next-chapter').addEventListener('click', () => openDialog(true));
+  $('next-chapter')?.addEventListener('click', () => openDialog(true));
   dialog.addEventListener('close', () => document.documentElement.classList.remove('modal-open'));
   dialog.addEventListener('click', event => {
     if (event.target !== dialog) return;
     const rect = dialog.getBoundingClientRect();
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
   });
-  const menu = $('site-menu');
   const menuToggle = $('menu-toggle');
   function setMenu(open) {
     menu.hidden = !open;
     menuToggle.setAttribute('aria-expanded', String(open));
     menuToggle.setAttribute('aria-label', open ? '关闭导航' : '打开导航');
   }
-  const destinations = [...menu.querySelectorAll('a[href^="#"]')].map(link => ({
-    link, target: $(link.hash.slice(1)),
-  })).filter(item => item.target);
-  function highlight(id) {
-    for (const {link, target} of destinations) {
-      if (target.id === id) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
-    }
-  }
-  function followFragment() {
-    const id = location.hash.slice(1);
-    if (id === 'references') document.querySelector('.source-drawer').open = true;
-    highlight(id.startsWith('person-') ? 'people' : id || 'chapter');
-  }
-  let scrollFrame = 0;
-  function syncScroll() {
-    scrollFrame = 0;
-    const atBottom = window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
-    const reached = destinations.filter(({target}) => target.getBoundingClientRect().top <= 100);
-    const current = atBottom ? destinations.at(-1) : reached.at(-1) || destinations[0];
-    if (current) highlight(current.target.id);
-  }
-  window.addEventListener('scroll', () => {
-    if (!scrollFrame) scrollFrame = requestAnimationFrame(syncScroll);
-  }, {passive: true});
-  window.addEventListener('hashchange', followFragment);
+  window.addEventListener('hashchange', redirectOldBookmark);
   menuToggle.addEventListener('click', () => setMenu(menu.hidden));
   menu.addEventListener('click', event => {
-    const link = event.target.closest('a');
-    if (!link) return;
-    if (link.hash === '#references') document.querySelector('.source-drawer').open = true;
-    highlight(link.hash.slice(1));
-    setMenu(false);
+    if (event.target.closest('a')) setMenu(false);
   });
   document.addEventListener('click', event => {
     if (!menu.hidden && !menu.contains(event.target) && !menuToggle.contains(event.target)) setMenu(false);
@@ -552,11 +591,20 @@
     }
   });
   window.addEventListener('storage', event => {
-    if (event.key === key && !dialog.open) {
+    if ((event.key === key || event.key === null) && !dialog.open) {
       state = readSaved() || fresh();
       render();
     }
   });
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    setMenu(false);
+    if (dialog.open) dialog.close();
+    state = readSaved() || fresh();
+    render();
+  });
   render();
-  followFragment();
+  if (page === 'people' && location.hash.startsWith('#person-')) {
+    $(location.hash.slice(1))?.scrollIntoView({block: 'center'});
+  }
 })();

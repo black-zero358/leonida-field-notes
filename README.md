@@ -4,11 +4,11 @@ GTA VI 中文无剧透游玩手记。打开后只显示当前章节，任务和�
 
 ## 运行
 
-直接打开 `public/index.html`，或在仓库根目录运行 `python -m http.server 8000 --directory public`，访问 `http://localhost:8000`。使用同一个浏览器和站点地址可保留进度。
+在仓库根目录运行 `python -m http.server 8000 --directory public`，访问 `http://localhost:8000`。剧情攻略在首页，武器备忘、任务与解锁、人物名录和资料来源分别位于 `/weapons/`、`/missions/`、`/people/` 和 `/references/`。同一浏览器中的五页共用游戏进度。
 
 ## 部署
 
-纯静态 HTML、CSS、JavaScript 与本地图片。Cloudflare Pages 的构建命令留空，输出目录设为 `public`。也可以将 `public` 目录直接上传到 Pages。
+修改页面模板、脚本、样式或数据后，在仓库根目录运行 `python tools/build_pages.py` 更新五个静态入口。Cloudflare Pages 的构建命令留空，输出目录设为 `public`。也可以将 `public` 目录直接上传到 Pages。
 
 ## 内容维护
 

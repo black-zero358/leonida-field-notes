@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#171223">
-  <meta name="description" content="GTA VI 的中文无剧透游玩手记。按当前章节查看武器收集窗口、任务解锁与已登场的人物。">
+  <meta name="description" content="按当前章节和任务查看游玩提示、收集窗口与已登场人物。">
   <title>日落路书 · GTA VI 无剧透游玩手记</title>
-  <link rel="icon" href="assets/sunset.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=f8a9ebb0e5">
-  <script defer src="guide-data.js?v=90aa9e5026"></script>
-  <script defer src="app.js?v=0b63e2a2b6"></script>
+  <link rel="icon" href="./assets/sunset.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=c27040db05">
+  <script defer src="./guide-data.js?v=90aa9e5026"></script>
+  <script defer src="./app.js?v=c700e53a9c"></script>
 </head>
-<body>
+<body data-page="chapter">
   <svg xmlns="http://www.w3.org/2000/svg" class="symbols" aria-hidden="true">
     <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20v-2a6 6 0 0 1 12 0v2Zm13-15a3 3 0 0 1 0 6m1 2a5 5 0 0 1 5 5v2h-4"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h14M3 18h18"/></symbol>
@@ -27,47 +27,68 @@
     <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="9" r="4.5"/><path d="m11.5 12.5 7 7 3-3-2-2-1.5 1.5-2-2"/></symbol>
     <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></symbol>
   </svg>
-  <a class="skip" href="#chapter">跳到当前章节</a>
+  <a class="skip" href="#main-content">跳到正文</a>
   <header class="sidebar" id="top">
     <div class="sidebar-top">
-      <a class="wordmark" href="#chapter" aria-label="GTA VI 日落路书首页"><span class="brand-game" lang="en">GTA VI</span><span class="brand-name">日落路书</span></a>
+      <a class="wordmark" data-page-link="chapter" href="./" aria-label="GTA VI 日落路书首页"><span class="brand-game" lang="en">GTA VI</span><span class="brand-name">日落路书</span></a>
       <p class="brand-subtitle">无剧透游玩手记</p>
       <button class="menu-button" type="button" id="menu-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="site-menu"><svg aria-hidden="true"><use href="#i-menu"/></svg></button>
     </div>
-    <nav class="menu" id="site-menu" data-section-nav aria-label="站内导航" hidden>
-      <a href="#chapter" aria-current="location"><svg aria-hidden="true"><use href="#i-book"/></svg>剧情攻略</a>
-      <a href="#weapons"><svg aria-hidden="true"><use href="#i-mark"/></svg>武器备忘</a>
-      <a href="#missions"><svg aria-hidden="true"><use href="#i-key"/></svg>任务与解锁</a>
-      <a href="#people"><svg aria-hidden="true"><use href="#i-people"/></svg>人物名录</a>
-      <a href="#references"><svg aria-hidden="true"><use href="#i-compass"/></svg>资料来源</a>
+    <nav class="menu" id="site-menu" aria-label="站内导航" hidden>
+      <a data-page-link="chapter" href="./" aria-current="page"><svg aria-hidden="true"><use href="#i-book"/></svg>剧情攻略</a>
+      <a data-page-link="weapons" href="./weapons/"><svg aria-hidden="true"><use href="#i-mark"/></svg>武器备忘</a>
+      <a data-page-link="missions" href="./missions/"><svg aria-hidden="true"><use href="#i-key"/></svg>任务与解锁</a>
+      <a data-page-link="people" href="./people/"><svg aria-hidden="true"><use href="#i-people"/></svg>人物名录</a>
+      <a data-page-link="references" href="./references/"><svg aria-hidden="true"><use href="#i-compass"/></svg>资料来源</a>
     </nav>
     <div class="side-foot"><svg aria-hidden="true"><use href="#i-check"/></svg>进度保存在当前浏览器</div>
   </header>
-  <main class="desk">
+  <main class="desk" id="main-content" tabindex="-1">
     <div class="panorama" aria-hidden="true"></div>
     <div class="desk-grid">
       <div class="desk-core">
         <section id="chapter" aria-labelledby="current-mission">
-          <div class="chapter-heading"><p><span id="chapter-index">第一章</span><span class="chapter-dot">·</span><span id="chapter-name">当前手记</span></p><span id="chapter-original" lang="en"></span></div>
-          <div class="mission-heading"><div class="mission-type"><p class="mission-tag" id="progress-label">当前任务</p><h1><span id="current-mission">尚未记录</span><span id="current-original" lang="en"></span></h1></div><button type="button" class="edit" data-open><svg aria-hidden="true"><use href="#i-slider"/></svg>调整进度</button></div>
-          <div class="advice"><div class="advice-top"><span class="advice-label"><svg aria-hidden="true"><use href="#i-compass"/></svg>本章提示</span><div id="focus-note" class="focus-note" hidden></div><button id="final-toggle" class="reveal" type="button" aria-expanded="false" aria-controls="final-note"><svg aria-hidden="true"><use href="#i-chevron"/></svg><span>查看章末任务</span></button></div><p id="final-note" class="final-note" hidden></p></div>
+          <div class="chapter-heading">
+  <p><span id="chapter-index">第一章</span><span class="chapter-dot">·</span><span id="chapter-name">当前手记</span></p>
+  <span id="chapter-original" lang="en"></span>
+</div>
+          <div class="mission-heading">
+            <div class="mission-type"><p class="mission-tag" id="progress-label">当前任务</p><h1><span id="current-mission">尚未记录</span><span id="current-original" lang="en"></span></h1></div>
+            <button type="button" class="edit" data-open><svg aria-hidden="true"><use href="#i-slider"/></svg>调整进度</button>
+          </div>
+          <div class="advice">
+            <div class="advice-top">
+              <span class="advice-label"><svg aria-hidden="true"><use href="#i-compass"/></svg>本章提示</span><div id="focus-note" class="focus-note" hidden></div>
+              <button id="final-toggle" class="reveal" type="button" aria-expanded="false" aria-controls="final-note"><svg aria-hidden="true"><use href="#i-chevron"/></svg><span>查看章末任务</span></button>
+            </div>
+            <p id="final-note" class="final-note" hidden></p>
+          </div>
         </section>
-        <section id="weapons" class="ledger-section" aria-labelledby="weapon-title">
-          <header class="ledger-label"><h2 id="weapon-title"><img alt="" src="assets/marks/weapon.webp">可获取物品</h2><span class="section-count" id="weapon-count"></span></header>
-          <div class="ledger-body"><div id="weapon-list"></div><details class="disclosure" id="field-notes" hidden><summary>其他领取窗口与可选事项<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary><div id="field-list"></div></details></div>
-        </section>
-        <section id="missions" class="ledger-section" aria-labelledby="mission-title">
-          <header class="ledger-label"><h2 id="mission-title"><img alt="" src="assets/marks/mission.webp">本章解锁</h2><span class="section-count" id="mission-count"></span></header>
-          <div class="ledger-body"><div id="unlock-list"></div><details class="disclosure" id="all-missions"><summary>本章任务清单<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary><div id="mission-list"></div></details><p class="context-note" id="chapter-note" hidden></p><button class="secondary next-chapter" type="button" id="next-chapter" hidden>已进入下一章</button></div>
-        </section>
-        <section id="people" class="ledger-section roster-section" aria-labelledby="people-title">
-          <header class="ledger-label"><h2 id="people-title"><img alt="" src="assets/marks/people.webp">已登场人物</h2><span class="section-count" id="people-count"></span></header>
-          <div id="people-list" class="people-list"></div>
-        </section>
-        <div id="references"><details class="disclosure source-drawer"><summary>本章资料来源<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary><div id="sources"></div></details></div>
+        <nav id="chapter-overview" class="overview" aria-label="本章栏目">
+          <a class="overview-link" data-page-link="weapons" href="weapons/">
+          <span class="overview-art"><img alt="" src="assets/marks/weapon.webp"></span>
+          <span class="overview-name"><strong>武器备忘</strong><small>领取窗口与收录状态</small></span>
+          <span class="overview-count" id="weapon-count"></span><span class="overview-arrow" aria-hidden="true">↗</span>
+        </a>
+<a class="overview-link" data-page-link="missions" href="missions/">
+          <span class="overview-art"><img alt="" src="assets/marks/mission.webp"></span>
+          <span class="overview-name"><strong>任务与解锁</strong><small>任务对应的开放功能</small></span>
+          <span class="overview-count" id="mission-count"></span><span class="overview-arrow" aria-hidden="true">↗</span>
+        </a>
+<a class="overview-link" data-page-link="people" href="people/">
+          <span class="overview-art"><img alt="" src="assets/marks/people.webp"></span>
+          <span class="overview-name"><strong>人物名录</strong><small>已登场人物与身份</small></span>
+          <span class="overview-count" id="people-count"></span><span class="overview-arrow" aria-hidden="true">↗</span>
+        </a>
+<a class="overview-link" data-page-link="references" href="references/">
+          <span class="overview-art"><svg aria-hidden="true"><use href="#i-compass"/></svg></span>
+          <span class="overview-name"><strong>资料来源</strong><small>本章攻略、译名与图片出处</small></span>
+          <span class="overview-arrow" aria-hidden="true">↗</span>
+        </a>
+        </nav>
         <footer class="footer"><span>日落路书</span><span>GTA VI 非官方游玩手记</span></footer>
       </div>
-      <aside id="portrait-rail" class="portrait-rail" aria-label="本章图册"></aside>
+      <aside id="portrait-rail" class="portrait-rail" aria-label="本章人物图册"></aside>
     </div>
   </main>
   <dialog id="progress-dialog" aria-labelledby="dialog-title">
